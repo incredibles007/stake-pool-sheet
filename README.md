@@ -23,6 +23,9 @@ cardano-cli query utxo --address $(cat payment.addr) --mainnet 1097911063
 cardano-cli query protocol-parameters --mainnet --out-file protocol.json
 ```
 
+### Firewall Configuration
+
+
 ## Full Instalation + Run
 
 ### Update
@@ -172,7 +175,7 @@ cardano-node run --topology mainnet-topology.json --database-path /db --socket-p
 --shelley-operational-certificate node.cert
 ```
 
-## Initialisation & Registering & Connect
+## Initialisation & Registering
 
 ### Generating Key
 
@@ -220,3 +223,20 @@ Move the cold key into a secure storage (usb etc)
 ```
 scp -rv -P<SSH PORT> -i ~/.ssh/<SSH_PRIVATE_KEY> ~/pool-keys USER@<PUBLIC_IP>:~/
 ```
+
+## Configuration
+
+
+
+## Operating
+
+### Transaction
+
+### Withdrawal
+
+### Querying
+
+## Monitoring
+
+## Delete
+
