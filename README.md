@@ -226,11 +226,70 @@ scp -rv -P<SSH PORT> -i ~/.ssh/<SSH_PRIVATE_KEY> ~/pool-keys USER@<PUBLIC_IP>:~/
 
 ## Configuration
 
+#### Protocol Parameter
 
 
 ## Operating
 
 ### Transaction
+
+First you need know your 2 involving addresses, destination and sender : The transaction will be between payment.addr (sender) sending 100 ADA (100,000,000 lovelaces) to payment.addr2 (destination).
+
+Be sure that you already have your protocol parameter file.
+
+(use --mainnet or --testnet-magic 1097911063 according to your case)
+
+#### Creating payment address
+
+```
+cardano-cli address key-gen --verification-key-file <addressName>.vkey --signing-key-file <addressName>.skey
+cardano-cli address build --payment-verification-key-file <addressName>.vkey --out-file <addressName>.addr --testnet-magic 1097911063
+```
+
+#### Time-To-Live
+
+```
+cardano-cli query tip --testnet-magic 1097911063
+```
+Get the slot Number of the current block and add your time to live (1200 = 20 minutes recommendend)
+keep your result close as we will need it to build our transaction (i.e slotNo = 1000 TTl = 2200)
+
+TTL = ```expr <slotNumber> + <TimeAdded>```
+
+#### Draft
+
+```
+cardano-cli query utxo --address $(cat payment.addr) --testnet-magic 1097911063
+```
+
+Get the information that comes from the output of your utxo : TxHash/TxIx/Lovelace
+
+```
+cardano-cli transaction build-raw --tx-in <TxHash>#<TxIx> --tx-out $(cat payment2.addr)+100000000 --tx-out $(cat payment.addr)+0 --ttl 0 --fee 0 --out-file tx.raw
+```
+
+#### Minimum fee
+
+```
+cardano-cli transaction calculate-min-fee --tx-body-file tx.raw --tx-in-count 1 --tx-out-count 2 --witness-count 1 --byron-witness-count 0 --testnet-magic 1097911063 --protocol-params-file protocol.json
+````
+
+Output will be the minimum fee in lovelaces, we have all information to build the transaction now 
+
+change = ```expr <Lovelace> - <AmountToSend> - <MinFee>```
+
+#### Build
+
+```
+cardano-cli transaction build-raw --tx-in <TxHash>#<TxIx> --tx-out $(cat payment2.addr)+<AmountToSend> --tx-out $(cat payment.addr)+<change> --ttl <TTL> --fee <MinFee> --out-file tx.raw
+cardano-cli transaction sign --tx-body-file tx.raw --signing-key-file payment.skey --testnet-magic 1097911063 --out-file tx.signed
+export CARDANO_NODE_SOCKET_PATH=~/cardano-node/relay/db/node.socket
+cardano-cli transaction submit --tx-file tx.signed --testnet-magic 1097911063
+```
+
+Check the balance of the 2 utxo.
+
+
 
 ### Withdrawal
 
